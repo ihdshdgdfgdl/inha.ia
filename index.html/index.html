@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Minha IA Completa</title>
+<title>Minha IA Avançada</title>
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background: #0f172a;
   color: white;
   margin: 0;
@@ -35,16 +35,15 @@ button {
   padding: 10px;
   background: #38bdf8;
   border: none;
-  cursor: pointer;
 }
-.user { color: #facc15; margin: 5px 0; }
-.bot { color: #38bdf8; margin: 5px 0; }
+.user { color: #facc15; }
+.bot { color: #38bdf8; }
 </style>
 </head>
 
 <body>
 
-<h2>🤖 Minha IA Completa</h2>
+<h2>🤖 IA Avançada em Português</h2>
 <div id="chat"></div>
 
 <div id="inputArea">
@@ -56,116 +55,116 @@ button {
 const chat = document.getElementById("chat");
 
 const dicionario = {
-  "amor": "Sentimento de carinho, afeto e cuidado.",
+  "amor": "Sentimento de carinho e afeto.",
   "vida": "Conjunto das características dos seres vivos.",
   "computador": "Máquina eletrônica que processa informações.",
   "internet": "Rede mundial de computadores.",
-  "matemática": "Ciência dos números e cálculos.",
   "história": "Estudo do passado.",
-  "geografia": "Estudo da Terra e dos lugares."
+  "geografia": "Estudo da Terra.",
+  "matemática": "Ciência dos números.",
+  "ciência": "Estudo da natureza."
 };
 
 const conhecimento = {
   "capital do brasil": "A capital do Brasil é Brasília.",
-  "quem descobriu o brasil": "Pedro Álvares Cabral em 1500.",
   "quantos estados tem o brasil": "O Brasil tem 26 estados e o Distrito Federal.",
-  "maior planeta": "O maior planeta do sistema solar é Júpiter.",
+  "quem descobriu o brasil": "Pedro Álvares Cabral em 1500.",
+  "maior planeta": "O maior planeta é Júpiter.",
   "menor planeta": "O menor planeta é Mercúrio.",
-  "o que é ia": "IA é Inteligência Artificial, sistemas que simulam inteligência humana."
+  "quem foi einstein": "Albert Einstein foi um físico famoso pela teoria da relatividade.",
+  "o que é ia": "IA é Inteligência Artificial.",
+  "o que é democracia": "Sistema de governo em que o povo participa das decisões.",
+  "quem foi dom pedro": "Dom Pedro I foi o primeiro imperador do Brasil."
 };
 
 function send() {
-  let input = document.getElementById("userInput").value.toLowerCase().trim();
+  let msg = document.getElementById("userInput").value.toLowerCase().trim();
   document.getElementById("userInput").value = "";
+  if (!msg) return;
 
-  if (!input) return;
-
-  chat.innerHTML += `<div class="user">Você: ${input}</div>`;
-  let resposta = processar(input);
-  chat.innerHTML += `<div class="bot">IA: ${resposta}</div>`;
+  chat.innerHTML += `<div class='user'>Você: ${msg}</div>`;
+  let resposta = processar(msg);
+  chat.innerHTML += `<div class='bot'>IA: ${resposta}</div>`;
   chat.scrollTop = chat.scrollHeight;
 }
 
 function processar(msg) {
 
   if (msg.includes("oi") || msg.includes("olá") || msg.includes("ola")) {
-    return "Olá! Posso fazer contas, tabuada, definir palavras e pesquisar na internet.";
+    return "Olá! Posso responder perguntas, fazer contas, tabuada, raiz, porcentagem e pesquisar na internet.";
   }
 
   if (msg === "ajuda") {
-    return "Você pode pedir: 2+2, tabuada 5, raiz 16, 2^3, 50%, defina amor, capital do brasil ou pesquisar algo.";
+    return "Você pode digitar: 2+2, tabuada 7, raiz 25, 2^3, 50%, defina amor, capital do brasil ou pesquisar algo.";
   }
 
+  // TABUADA
   if (msg.startsWith("tabuada")) {
     let n = parseInt(msg.replace("tabuada","").trim());
-    if (isNaN(n)) return "Use: tabuada 5";
-    let r = "";
-    for (let i=1;i<=10;i++) r += `${n} x ${i} = ${n*i} | `;
+    if (isNaN(n)) return "Digite: tabuada 5";
+    let r="";
+    for (let i=1;i<=10;i++) r+=`${n} x ${i} = ${n*i} | `;
     return r;
   }
 
+  // RAIZ
   if (msg.startsWith("raiz")) {
     let n = parseFloat(msg.replace("raiz","").trim());
-    if (isNaN(n)) return "Use: raiz 16";
     return "Resultado: " + Math.sqrt(n);
   }
 
+  // POTÊNCIA
   if (msg.includes("^")) {
     let p = msg.split("^");
     return "Resultado: " + Math.pow(p[0], p[1]);
   }
 
+  // PORCENTAGEM
   if (msg.includes("%")) {
     let n = parseFloat(msg.replace("%",""));
     return `${n}% = ${n/100}`;
   }
 
+  // MATEMÁTICA GERAL
   if (msg.match(/[0-9+\-*/().]/)) {
     try {
       return "Resultado: " + eval(msg);
     } catch {
-      return "Erro ao calcular.";
+      return "Erro no cálculo.";
     }
   }
 
+  // DICIONÁRIO
   if (msg.startsWith("defina")) {
     let palavra = msg.replace("defina","").trim();
-    return dicionario[palavra] || "Não tenho essa palavra no dicionário.";
+    return dicionario[palavra] || "Palavra não encontrada.";
   }
 
+  // CONHECIMENTO
   if (conhecimento[msg]) return conhecimento[msg];
 
+  // PESQUISA
   if (msg.startsWith("pesquisar")) {
-    pesquisarInternet(msg.replace("pesquisar",""));
-    return "Pesquisando na internet...";
+    let termo = msg.replace("pesquisar","");
+    window.open("https://www.google.com/search?q="+termo,"_blank");
+    return "Pesquisando na internet sobre: " + termo;
   }
 
-  return "Não entendi. Digite 'ajuda' para ver exemplos do que posso fazer.";
-}
-
-function pesquisarInternet(termo) {
-  fetch(`https://api.duckduckgo.com/?q=${termo}&format=json`)
-    .then(res => res.json())
-    .then(data => {
-      let resposta = data.AbstractText || "Não encontrei resposta clara.";
-      chat.innerHTML += `<div class="bot">IA (Pesquisa): ${resposta}</div>`;
-    })
-    .catch(() => {
-      chat.innerHTML += `<div class="bot">Erro ao pesquisar.</div>`;
-    });
+  return "Não entendi. Digite 'ajuda' para ver exemplos.";
 }
 
 /* ==========================
    ÁREA PARA VOCÊ EXPANDIR
-   (adicione novos recursos aqui)
 ========================== */
-
 function novaFuncao() {
-  console.log("Aqui você pode adicionar novas funções.");
+  // Aqui você pode adicionar:
+  // agenda
+  // memória
+  // login
+  // API de IA real
 }
 
 </script>
-
 </body>
 </html>
 
