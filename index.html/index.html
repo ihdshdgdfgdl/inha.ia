@@ -2,127 +2,177 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Minha IA</title>
+<title>Minha IA PRO Refinada</title>
+
 <style>
-body {
-  font-family: Arial;
-  background:#111;
-  color:white;
-  text-align:center;
-}
-#chat {
-  width:90%;
-  height:300px;
-  overflow:auto;
-  border:1px solid #555;
-  padding:10px;
-  margin:auto;
-}
-input, button {
-  padding:10px;
-  font-size:16px;
-}
+body{background:#0f172a;color:white;font-family:Arial;text-align:center;}
+#app{max-width:800px;margin:auto;}
+#chat{background:#1e293b;height:450px;overflow-y:auto;padding:15px;border-radius:10px;}
+.user{color:#38bdf8;text-align:right;margin:6px;}
+.bot{color:#22c55e;text-align:left;margin:6px;}
+input{width:70%;padding:10px;border-radius:5px;}
+button{padding:10px;border-radius:5px;background:#22c55e;border:none;margin:5px;}
+#menu button{background:#334155;}
 </style>
 </head>
+
 <body>
+<div id="app">
+<h2>🤖 Minha IA PRO</h2>
 
-<h1>Minha IA Inteligente</h1>
+<div id="menu">
+<button onclick="ajuda()">Ajuda</button>
+<button onclick="exemplos()">Exemplos</button>
+<button onclick="limpar()">Limpar</button>
+</div>
 
-<div id="chat"></div><br>
+<div id="chat"></div>
 
 <input id="pergunta" placeholder="Digite sua pergunta">
-<button onclick="responder()">Enviar</button>
+<button onclick="enviar()">Enviar</button>
+</div>
 
 <script>
+const API_KEY = "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";
 
-// ===== BASE DE CONHECIMENTO =====
-const respostas = {
-  "oi": "Olá! Como posso te ajudar?",
-  "bom dia": "Bom dia! 😄",
-  "boa tarde": "Boa tarde!",
-  "boa noite": "Boa noite!",
-  "quem é você": "Sou uma IA criada por você.",
-  "o que você faz": "Eu respondo perguntas, faço contas e pesquiso.",
-  "tabuada": "Digite: tabuada 5 (por exemplo)",
-  "ajuda": "Posso responder perguntas, fazer contas e pesquisar na internet."
-};
-
-// ===== DICIONÁRIO =====
-const dicionario = {
-  "amor": "Sentimento de carinho e afeto.",
-  "feliz": "Estado de alegria.",
-  "triste": "Estado de tristeza.",
-  "computador": "Máquina que processa informações."
-};
-
-// ===== FUNÇÃO PRINCIPAL =====
-async function responder(){
-  let pergunta = document.getElementById("pergunta").value.toLowerCase();
-  let chat = document.getElementById("chat");
-
-  chat.innerHTML += "<b>Você:</b> " + pergunta + "<br>";
-
-  // MATEMÁTICA
-  if(pergunta.match(/[\d\+\-\*\/]/)){
-    try{
-      let resultado = eval(pergunta);
-      chat.innerHTML += "<b>IA:</b> Resultado = " + resultado + "<br>";
-      return;
-    }catch{
-      chat.innerHTML += "<b>IA:</b> Não consegui calcular.<br>";
-      return;
-    }
-  }
-
-  // TABUADA
-  if(pergunta.includes("tabuada")){
-    let num = pergunta.replace("tabuada","").trim();
-    let resposta = "";
-    for(let i=1;i<=10;i++){
-      resposta += num+" x "+i+" = "+(num*i)+"<br>";
-    }
-    chat.innerHTML += "<b>IA:</b><br>"+resposta;
-    return;
-  }
-
-  // DICIONÁRIO
-  if(pergunta.startsWith("significado")){
-    let palavra = pergunta.replace("significado","").trim();
-    if(dicionario[palavra]){
-      chat.innerHTML += "<b>IA:</b> "+dicionario[palavra]+"<br>";
-    } else {
-      chat.innerHTML += "<b>IA:</b> Não achei no dicionário.<br>";
-    }
-    return;
-  }
-
-  // RESPOSTAS FIXAS
-  if(respostas[pergunta]){
-    chat.innerHTML += "<b>IA:</b> "+respostas[pergunta]+"<br>";
-    return;
-  }
-
-  // PESQUISA NA INTERNET (Wikipedia)
-  let resultado = await pesquisarWikipedia(pergunta);
-  chat.innerHTML += "<b>IA:</b> "+resultado+"<br>";
+// ================= UTILIDADES =================
+function mostrar(texto, classe){
+  let chat=document.getElementById("chat");
+  chat.innerHTML+=`<div class="${classe}">${texto}</div>`;
+  chat.scrollTop=chat.scrollHeight;
+  salvarHistorico();
 }
 
-// ===== PESQUISA =====
-async function pesquisarWikipedia(texto){
-  let url = "https://pt.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(texto);
+function salvarHistorico(){
+  localStorage.setItem("chat",document.getElementById("chat").innerHTML);
+}
+
+function carregarHistorico(){
+  let h=localStorage.getItem("chat");
+  if(h) document.getElementById("chat").innerHTML=h;
+}
+carregarHistorico();
+
+function limpar(){
+  document.getElementById("chat").innerHTML="";
+  localStorage.removeItem("chat");
+}
+
+// ================= MENUS =================
+function ajuda(){
+  mostrar("IA: Posso conversar, fazer cálculos, tabuada, explicar palavras, história, geografia e pesquisar informações.","bot");
+}
+
+function exemplos(){
+  mostrar("IA: Exemplos → 2+2 | tabuada do 6 | significado de amor | quem foi dom pedro | o que é geografia","bot");
+}
+
+// ================= MATEMÁTICA =================
+function calcular(txt){
   try{
-    let res = await fetch(url);
-    let data = await res.json();
-    if(data.extract){
-      return data.extract;
-    } else {
-      return "Não encontrei resposta.";
+    if(txt.match(/[0-9]+[\+\-\*\/][0-9]+/)){
+      return eval(txt);
     }
-  }catch{
-    return "Erro ao pesquisar na internet.";
-  }
+  }catch{}
+  return null;
 }
 
+function tabuada(txt){
+  if(txt.includes("tabuada")){
+    let n=parseInt(txt.replace("tabuada do","").trim());
+    if(isNaN(n)) return null;
+    let r="";
+    for(let i=1;i<=10;i++){
+      r+=`${n} x ${i} = ${n*i}<br>`;
+    }
+    return r;
+  }
+  return null;
+}
+
+// ================= DICIONÁRIO =================
+const dicionario={
+"amor":"Sentimento de carinho profundo.",
+"amizade":"Relação de afeto entre pessoas.",
+"matemática":"Ciência dos números.",
+"geografia":"Estudo da Terra.",
+"história":"Estudo do passado."
+};
+
+// ================= RESPOSTAS FIXAS =================
+const respostas={
+"oi":"Olá! Eu sou sua IA PRO.",
+"olá":"Oi! Como posso ajudar?",
+"quem é você":"Sou uma inteligência artificial criada por você.",
+"o que você faz":"Respondo perguntas, faço contas e pesquiso informações.",
+"bom dia":"Bom dia! Em que posso ajudar?",
+"boa tarde":"Boa tarde!",
+"boa noite":"Boa noite!"
+};
+
+// ================= DATA E HORA =================
+function dataHora(){
+  let d=new Date();
+  return d.toLocaleString("pt-BR");
+}
+
+// ================= API IA =================
+async function pesquisarIA(pergunta){
+  const response = await fetch(
+    "https://api-inference.huggingface.co/models/google/flan-t5-base",
+    {
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+API_KEY,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({inputs:pergunta})
+    }
+  );
+  const data = await response.json();
+  return data[0].generated_text;
+}
+
+// ================= MOTOR PRINCIPAL =================
+async function enviar(){
+  let txt=document.getElementById("pergunta").value.toLowerCase().trim();
+  document.getElementById("pergunta").value="";
+  mostrar("Você: "+txt,"user");
+
+  if(respostas[txt]){
+    mostrar("IA: "+respostas[txt],"bot"); return;
+  }
+
+  if(txt=="hora"||txt=="data"){
+    mostrar("IA: "+dataHora(),"bot"); return;
+  }
+
+  let calc=calcular(txt);
+  if(calc!==null){
+    mostrar("IA: Resultado = "+calc,"bot"); return;
+  }
+
+  let tab=tabuada(txt);
+  if(tab){
+    mostrar("IA:<br>"+tab,"bot"); return;
+  }
+
+  if(txt.startsWith("significado de")){
+    let p=txt.replace("significado de","").trim();
+    if(dicionario[p]){
+      mostrar("IA: "+dicionario[p],"bot"); return;
+    }
+  }
+
+  mostrar("IA: Pesquisando...","bot");
+  let resp=await pesquisarIA(txt);
+  mostrar("IA: "+resp,"bot");
+}
+
+// ================= FUTURA ATUALIZAÇÃO =================
+// Espaço reservado para novas funções futuras sem quebrar o sistema
 </script>
+
 </body>
 </html>
+
