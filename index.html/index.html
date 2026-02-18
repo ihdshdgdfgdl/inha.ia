@@ -2,177 +2,79 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Minha IA PRO Refinada</title>
-
+<title>Minha IA com Pesquisa</title>
 <style>
 body{background:#0f172a;color:white;font-family:Arial;text-align:center;}
-#app{max-width:800px;margin:auto;}
-#chat{background:#1e293b;height:450px;overflow-y:auto;padding:15px;border-radius:10px;}
-.user{color:#38bdf8;text-align:right;margin:6px;}
-.bot{color:#22c55e;text-align:left;margin:6px;}
+#chat{background:#1e293b;height:400px;overflow-y:auto;padding:10px;border-radius:10px;}
+.user{color:#38bdf8;text-align:right;margin:5px;}
+.bot{color:#22c55e;text-align:left;margin:5px;}
 input{width:70%;padding:10px;border-radius:5px;}
-button{padding:10px;border-radius:5px;background:#22c55e;border:none;margin:5px;}
-#menu button{background:#334155;}
+button{padding:10px;border-radius:5px;background:#22c55e;border:none;}
 </style>
 </head>
-
 <body>
-<div id="app">
-<h2>🤖 Minha IA PRO</h2>
 
-<div id="menu">
-<button onclick="ajuda()">Ajuda</button>
-<button onclick="exemplos()">Exemplos</button>
-<button onclick="limpar()">Limpar</button>
-</div>
-
-<div id="chat"></div>
+<h2>🤖 Minha IA</h2>
+<div id="chat"></div><br>
 
 <input id="pergunta" placeholder="Digite sua pergunta">
 <button onclick="enviar()">Enviar</button>
-</div>
 
 <script>
 const API_KEY = "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";
 
-// ================= UTILIDADES =================
 function mostrar(texto, classe){
   let chat=document.getElementById("chat");
   chat.innerHTML+=`<div class="${classe}">${texto}</div>`;
   chat.scrollTop=chat.scrollHeight;
-  salvarHistorico();
 }
 
-function salvarHistorico(){
-  localStorage.setItem("chat",document.getElementById("chat").innerHTML);
+// 🔹 Pesquisa REAL na Wikipedia
+async function pesquisarWiki(pergunta){
+  let url="https://pt.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(pergunta);
+  let r=await fetch(url);
+  let d=await r.json();
+  return d.extract || "Não encontrei resultado na internet.";
 }
 
-function carregarHistorico(){
-  let h=localStorage.getItem("chat");
-  if(h) document.getElementById("chat").innerHTML=h;
-}
-carregarHistorico();
-
-function limpar(){
-  document.getElementById("chat").innerHTML="";
-  localStorage.removeItem("chat");
-}
-
-// ================= MENUS =================
-function ajuda(){
-  mostrar("IA: Posso conversar, fazer cálculos, tabuada, explicar palavras, história, geografia e pesquisar informações.","bot");
-}
-
-function exemplos(){
-  mostrar("IA: Exemplos → 2+2 | tabuada do 6 | significado de amor | quem foi dom pedro | o que é geografia","bot");
-}
-
-// ================= MATEMÁTICA =================
-function calcular(txt){
-  try{
-    if(txt.match(/[0-9]+[\+\-\*\/][0-9]+/)){
-      return eval(txt);
-    }
-  }catch{}
-  return null;
-}
-
-function tabuada(txt){
-  if(txt.includes("tabuada")){
-    let n=parseInt(txt.replace("tabuada do","").trim());
-    if(isNaN(n)) return null;
-    let r="";
-    for(let i=1;i<=10;i++){
-      r+=`${n} x ${i} = ${n*i}<br>`;
-    }
-    return r;
-  }
-  return null;
-}
-
-// ================= DICIONÁRIO =================
-const dicionario={
-"amor":"Sentimento de carinho profundo.",
-"amizade":"Relação de afeto entre pessoas.",
-"matemática":"Ciência dos números.",
-"geografia":"Estudo da Terra.",
-"história":"Estudo do passado."
-};
-
-// ================= RESPOSTAS FIXAS =================
-const respostas={
-"oi":"Olá! Eu sou sua IA PRO.",
-"olá":"Oi! Como posso ajudar?",
-"quem é você":"Sou uma inteligência artificial criada por você.",
-"o que você faz":"Respondo perguntas, faço contas e pesquiso informações.",
-"bom dia":"Bom dia! Em que posso ajudar?",
-"boa tarde":"Boa tarde!",
-"boa noite":"Boa noite!"
-};
-
-// ================= DATA E HORA =================
-function dataHora(){
-  let d=new Date();
-  return d.toLocaleString("pt-BR");
-}
-
-// ================= API IA =================
+// 🔹 Pesquisa IA (Hugging Face)
 async function pesquisarIA(pergunta){
   const response = await fetch(
-    "https://api-inference.huggingface.co/models/google/flan-t5-base",
+    "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
     {
       method:"POST",
       headers:{
         "Authorization":"Bearer "+API_KEY,
         "Content-Type":"application/json"
       },
-      body:JSON.stringify({inputs:pergunta})
+      body:JSON.stringify({
+        inputs:"Responda em português: "+pergunta
+      })
     }
   );
   const data = await response.json();
   return data[0].generated_text;
 }
 
-// ================= MOTOR PRINCIPAL =================
 async function enviar(){
-  let txt=document.getElementById("pergunta").value.toLowerCase().trim();
+  let txt=document.getElementById("pergunta").value;
   document.getElementById("pergunta").value="";
   mostrar("Você: "+txt,"user");
 
-  if(respostas[txt]){
-    mostrar("IA: "+respostas[txt],"bot"); return;
+  mostrar("IA: Pesquisando na internet...","bot");
+
+  // primeiro tenta Wikipedia (internet real)
+  let wiki = await pesquisarWiki(txt);
+  if(wiki && wiki.length > 50){
+    mostrar("IA (Wikipedia): "+wiki,"bot");
+    return;
   }
 
-  if(txt=="hora"||txt=="data"){
-    mostrar("IA: "+dataHora(),"bot"); return;
-  }
-
-  let calc=calcular(txt);
-  if(calc!==null){
-    mostrar("IA: Resultado = "+calc,"bot"); return;
-  }
-
-  let tab=tabuada(txt);
-  if(tab){
-    mostrar("IA:<br>"+tab,"bot"); return;
-  }
-
-  if(txt.startsWith("significado de")){
-    let p=txt.replace("significado de","").trim();
-    if(dicionario[p]){
-      mostrar("IA: "+dicionario[p],"bot"); return;
-    }
-  }
-
-  mostrar("IA: Pesquisando...","bot");
-  let resp=await pesquisarIA(txt);
-  mostrar("IA: "+resp,"bot");
+  // se não achar, usa IA
+  let ia = await pesquisarIA(txt);
+  mostrar("IA: "+ia,"bot");
 }
-
-// ================= FUTURA ATUALIZAÇÃO =================
-// Espaço reservado para novas funções futuras sem quebrar o sistema
 </script>
 
 </body>
 </html>
-
