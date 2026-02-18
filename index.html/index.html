@@ -161,16 +161,5 @@ function novaFuncao() {
 
 </body>
 </html>
-function pesquisarInternet(pergunta) {
-  fetch(`https://api.duckduckgo.com/?q=${pergunta}&format=json`)
-    .then(res => res.json())
-    .then(data => {
-      let resposta = data.AbstractText || "Não achei resposta.";
-      chat.innerHTML += `<div class='bot'>IA: ${resposta}</div>`;
-    });
-}
-if (msg.startsWith("pesquisar")) {
-  pesquisarInternet(msg.replace("pesquisar",""));
-  return "Pesquisando na internet...";
-}
+
 
