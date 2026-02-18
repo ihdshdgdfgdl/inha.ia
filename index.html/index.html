@@ -1,1 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Minha IA Completa</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  margin: 0;
+}
+h2 {
+  text-align: center;
+  background: #1e293b;
+  padding: 10px;
+}
+#chat {
+  height: 75vh;
+  overflow-y: auto;
+  padding: 10px;
+}
+#inputArea {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+}
+button {
+  padding: 10px;
+  background: #38bdf8;
+  border: none;
+  cursor: pointer;
+}
+.user { color: #facc15; margin: 5px 0; }
+.bot { color: #38bdf8; margin: 5px 0; }
+</style>
+</head>
+
+<body>
+
+<h2>🤖 Minha IA Completa</h2>
+<div id="chat"></div>
+
+<div id="inputArea">
+<input id="userInput" placeholder="Digite sua pergunta..." />
+<button onclick="send()">Enviar</button>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+
+const dicionario = {
+  "amor": "Sentimento de carinho, afeto e cuidado.",
+  "vida": "Conjunto das características dos seres vivos.",
+  "computador": "Máquina eletrônica que processa informações.",
+  "internet": "Rede mundial de computadores.",
+  "matemática": "Ciência dos números e cálculos.",
+  "história": "Estudo do passado.",
+  "geografia": "Estudo da Terra e dos lugares."
+};
+
+const conhecimento = {
+  "capital do brasil": "A capital do Brasil é Brasília.",
+  "quem descobriu o brasil": "Pedro Álvares Cabral em 1500.",
+  "quantos estados tem o brasil": "O Brasil tem 26 estados e o Distrito Federal.",
+  "maior planeta": "O maior planeta do sistema solar é Júpiter.",
+  "menor planeta": "O menor planeta é Mercúrio.",
+  "o que é ia": "IA é Inteligência Artificial, sistemas que simulam inteligência humana."
+};
+
+function send() {
+  let input = document.getElementById("userInput").value.toLowerCase().trim();
+  document.getElementById("userInput").value = "";
+
+  if (!input) return;
+
+  chat.innerHTML += `<div class="user">Você: ${input}</div>`;
+  let resposta = processar(input);
+  chat.innerHTML += `<div class="bot">IA: ${resposta}</div>`;
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function processar(msg) {
+
+  if (msg.includes("oi") || msg.includes("olá") || msg.includes("ola")) {
+    return "Olá! Posso fazer contas, tabuada, definir palavras e pesquisar na internet.";
+  }
+
+  if (msg === "ajuda") {
+    return "Você pode pedir: 2+2, tabuada 5, raiz 16, 2^3, 50%, defina amor, capital do brasil ou pesquisar algo.";
+  }
+
+  if (msg.startsWith("tabuada")) {
+    let n = parseInt(msg.replace("tabuada","").trim());
+    if (isNaN(n)) return "Use: tabuada 5";
+    let r = "";
+    for (let i=1;i<=10;i++) r += `${n} x ${i} = ${n*i} | `;
+    return r;
+  }
+
+  if (msg.startsWith("raiz")) {
+    let n = parseFloat(msg.replace("raiz","").trim());
+    if (isNaN(n)) return "Use: raiz 16";
+    return "Resultado: " + Math.sqrt(n);
+  }
+
+  if (msg.includes("^")) {
+    let p = msg.split("^");
+    return "Resultado: " + Math.pow(p[0], p[1]);
+  }
+
+  if (msg.includes("%")) {
+    let n = parseFloat(msg.replace("%",""));
+    return `${n}% = ${n/100}`;
+  }
+
+  if (msg.match(/[0-9+\-*/().]/)) {
+    try {
+      return "Resultado: " + eval(msg);
+    } catch {
+      return "Erro ao calcular.";
+    }
+  }
+
+  if (msg.startsWith("defina")) {
+    let palavra = msg.replace("defina","").trim();
+    return dicionario[palavra] || "Não tenho essa palavra no dicionário.";
+  }
+
+  if (conhecimento[msg]) return conhecimento[msg];
+
+  if (msg.startsWith("pesquisar")) {
+    pesquisarInternet(msg.replace("pesquisar",""));
+    return "Pesquisando na internet...";
+  }
+
+  return "Não entendi. Digite 'ajuda' para ver exemplos do que posso fazer.";
+}
+
+function pesquisarInternet(termo) {
+  fetch(`https://api.duckduckgo.com/?q=${termo}&format=json`)
+    .then(res => res.json())
+    .then(data => {
+      let resposta = data.AbstractText || "Não encontrei resposta clara.";
+      chat.innerHTML += `<div class="bot">IA (Pesquisa): ${resposta}</div>`;
+    })
+    .catch(() => {
+      chat.innerHTML += `<div class="bot">Erro ao pesquisar.</div>`;
+    });
+}
+
+/* ==========================
+   ÁREA PARA VOCÊ EXPANDIR
+   (adicione novos recursos aqui)
+========================== */
+
+function novaFuncao() {
+  console.log("Aqui você pode adicionar novas funções.");
+}
+
+</script>
+
+</body>
+</html>
 
