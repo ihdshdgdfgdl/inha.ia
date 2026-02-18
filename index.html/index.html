@@ -146,17 +146,14 @@ function enviar() {
     if (resposta) {
       adicionarMensagem("IA: " + resposta, "bot");
     } else {
-      // Aqui é onde você pode inserir a lógica de API
-      adicionarMensagem("IA: Não sei a resposta. Tente me ensinar ou pergunte outra coisa.", "bot");
-      
-      // Exemplo de chamada API (comentado, pronto para você inserir)
-      /*
-      fetch('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', {
+      // Aqui é o espaço para a busca na API
+      adicionarMensagem("IA: Pesquisando na internet...", "bot");
+      // Insira o código da sua API aqui
+      fetch('URL_DA_SUA_API', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Se precisar de chave, coloque aqui
-          // 'Authorization': 'Bearer SUA_CHAVE'
+          'Authorization': 'Bearer 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' // Insira sua chave aqui
         },
         body: JSON.stringify({ pergunta: pergunta })
       })
@@ -169,10 +166,9 @@ function enviar() {
         }
       })
       .catch(error => {
-        adicionarMensagem("IA: Erro na pesquisa online.", "bot");
+        adicionarMensagem("IA: Erro ao pesquisar na internet.", "bot");
         console.error(error);
       });
-      */
     }
   }
   
