@@ -1,183 +1,36 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Minha IA Escolar</title>
-  <style>
-    body {
-      background: #0f172a;
-      color: white;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #020617;
-      padding: 15px;
-      text-align: center;
-      font-size: 24px;
-    }
-    #chat {
-      height: 60vh;
-      overflow-y: auto;
-      padding: 15px;
-      border-top: 1px solid #334155;
-      border-bottom: 1px solid #334155;
-    }
-    .user {
-      color: #38bdf8;
-      margin: 5px;
-      text-align: right;
-    }
-    .bot {
-      color: #22c55e;
-      margin: 5px;
-      text-align: left;
-    }
-    footer {
-      display: flex;
-      padding: 10px;
-      background: #020617;
-    }
-    input {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px;
-      background: #22c55e;
-      border: none;
-      color: black;
-      font-weight: bold;
-      border-radius: 5px;
-      margin-left: 10px;
-    }
-    .saved-texts {
-      margin: 10px;
-      padding: 10px;
-      border: 1px solid #334155;
-      background: #1e293b;
-    }
-  </style>
-</head>
-<body>
+// Aqui é o espaço para a busca na API
+      adicionarMensagem("IA: Pensando...", "bot");
+      
+      // Exemplo usando o modelo Mistral (ótimo para textos gerais). 
+      // Você pode trocar o final da URL para outro modelo do site Hugging Face.
+      const API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
 
-  <header>🤖 Minha IA Escolar</header>
-  <div id="chat"></div>
-  <footer>
-    <input id="input" placeholder="Digite sua pergunta ou texto para salvar">
-    <button onclick="enviar()">Enviar</button>
-  </footer>
-  <div class="saved-texts">
-    <h3>Textos Salvos</h3>
-    <div id="savedList"></div>
-  </div>
-
-<script>
-// Base de conhecimento inicial
-const baseConhecimento = {
-  "oi": "Olá! Eu sou sua IA escolar. Pergunte o que quiser sobre matérias básicas.",
-  "quem é você": "Sou uma inteligência artificial criada para ajudar com temas escolares.",
-  "tabuada do 2": "Tabuada do 2: 2x1=2, 2x2=4, 2x3=6, 2x4=8, 2x5=10",
-  "tabuada do 3": "Tabuada do 3: 3x1=3, 3x2=6, 3x3=9, 3x4=12, 3x5=15",
-  "capital do brasil": "A capital do Brasil é Brasília.",
-  "quem foi dom pedro": "Dom Pedro I foi o primeiro imperador do Brasil, proclamando a independência em 1822."
-};
-
-// Função para adicionar mensagem no chat
-function adicionarMensagem(texto, classe) {
-  let chat = document.getElementById("chat");
-  let msg = document.createElement("div");
-  msg.className = classe;
-  msg.innerText = texto;
-  chat.appendChild(msg);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-// Função para salvar texto no LocalStorage
-function salvarTexto(texto) {
-  let textosSalvos = JSON.parse(localStorage.getItem('textosSalvos')) || [];
-  textosSalvos.push(texto);
-  localStorage.setItem('textosSalvos', JSON.stringify(textosSalvos));
-  atualizarLista();
-}
-
-// Função para atualizar lista de textos salvos na tela
-function atualizarLista() {
-  let lista = document.getElementById('savedList');
-  lista.innerHTML = '';
-  let textosSalvos = JSON.parse(localStorage.getItem('textosSalvos')) || [];
-  textosSalvos.forEach((texto, index) => {
-    let item = document.createElement('div');
-    item.innerText = (index + 1) + '. ' + texto;
-    lista.appendChild(item);
-  });
-}
-
-// Função principal ao enviar
-function enviar() {
-  let input = document.getElementById("input");
-  let pergunta = input.value.trim().toLowerCase();
-  if (pergunta === "") return;
-  
-  adicionarMensagem("Você: " + pergunta, "user");
-  
-  // Se for adicionar texto ao banco de dados local
-  if (pergunta.startsWith("salvar:")) {
-    let textoParaSalvar = pergunta.replace("salvar:", "").trim();
-    if (textoParaSalvar) {
-      salvarTexto(textoParaSalvar);
-      adicionarMensagem("IA: Texto salvo com sucesso!", "bot");
-    } else {
-      adicionarMensagem("IA: Por favor, insira um texto para salvar.", "bot");
-    }
-  } 
-  // Se for uma pergunta, primeiro busca na base
-  else if (baseConhecimento[pergunta]) {
-    adicionarMensagem("IA: " + baseConhecimento[pergunta], "bot");
-  } 
-  // Busca nos textos salvos no LocalStorage
-  else {
-    let textosSalvos = JSON.parse(localStorage.getItem('textosSalvos')) || [];
-    let resposta = textosSalvos.find(texto => texto.toLowerCase().includes(pergunta));
-    if (resposta) {
-      adicionarMensagem("IA: " + resposta, "bot");
-    } else {
-      // Aqui é o espaço para a busca na API
-      adicionarMensagem("IA: Pesquisando na internet...", "bot");
-      // Insira o código da sua API aqui
-      fetch('URL_DA_SUA_API', {
+      fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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' // Insira sua chave aqui
+          'Authorization': 'Bearer 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' // Cuidado com sua chave!
         },
-        body: JSON.stringify({ pergunta: pergunta })
+        // A Hugging Face geralmente pede que o texto vá dentro de "inputs"
+        body: JSON.stringify({ inputs: pergunta }) 
       })
       .then(response => response.json())
       .then(data => {
-        if (data.resposta) {
-          adicionarMensagem("IA: " + data.resposta, "bot");
+        // A API da Hugging Face devolve a resposta dentro de um array
+        if (data && data[0] && data[0].generated_text) {
+          // Limpando a resposta para não repetir a sua pergunta no chat
+          let respostaLimpa = data[0].generated_text.replace(pergunta, "").trim();
+          
+          if(respostaLimpa === "") {
+             adicionarMensagem("IA: Não consegui formular uma resposta clara para isso.", "bot");
+          } else {
+             adicionarMensagem("IA: " + respostaLimpa, "bot");
+          }
         } else {
-          adicionarMensagem("IA: Não encontrei uma resposta online.", "bot");
+          adicionarMensagem("IA: Houve um erro na resposta do servidor.", "bot");
         }
       })
       .catch(error => {
-        adicionarMensagem("IA: Erro ao pesquisar na internet.", "bot");
-        console.error(error);
+        adicionarMensagem("IA: Erro de conexão ao pesquisar na internet.", "bot");
+        console.error("Erro na API:", error);
       });
-    }
-  }
-  
-  input.value = "";
-}
-
-// Inicializa a lista de textos salvos ao carregar
-atualizarLista();
-</script>
-
-</body>
-</html>
